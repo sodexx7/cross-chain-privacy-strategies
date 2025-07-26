@@ -1,5 +1,5 @@
 import { id, Interface, JsonRpcProvider } from "ethers";
-import Sdk from "@1inch/cross-chain-sdk";
+import * as Sdk from "@1inch/cross-chain-sdk";
 import EscrowFactoryContract from "../../artifacts/contracts/1inch/cross-chain-swap/contracts/EscrowFactory.sol/EscrowFactory.json";
 
 export class EscrowFactory {

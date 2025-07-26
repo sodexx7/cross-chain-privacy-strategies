@@ -1,11 +1,13 @@
+Based on [cross-chain-resolver](https://github.com/1inch/cross-chain-resolver-example)
+
 ```
-node v20.19.2
+yarn -v 1.22.22
+node v22.15.0
+
 
 ```
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
+```
+yarn install
+yarn test
 ```

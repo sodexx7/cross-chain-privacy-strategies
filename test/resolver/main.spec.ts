@@ -5,7 +5,7 @@ import { expect } from "chai";
 import { createServer, CreateServerReturnType } from "prool";
 import { anvil } from "prool/instances";
 
-import Sdk from "@1inch/cross-chain-sdk";
+import * as Sdk from "@1inch/cross-chain-sdk";
 import {
   computeAddress,
   ContractFactory,
@@ -67,7 +67,7 @@ describe("Resolving example", () => {
     );
   }
 
-  before(async function() {
+  before(async function () {
     this.timeout(60000); // 60 second timeout for setup
     [src, dst] = await Promise.all([
       initChain(config.chain.source),
@@ -78,6 +78,16 @@ describe("Resolving example", () => {
     dstChainUser = new Wallet(userPk, dst.provider);
     srcChainResolver = new Wallet(resolverPk, src.provider);
     dstChainResolver = new Wallet(resolverPk, dst.provider);
+
+    // Fund resolver accounts with ETH for gas and safety deposits using anvil
+    await src.provider.send("anvil_setBalance", [
+      await srcChainResolver.getAddress(),
+      "0x56BC75E2D630E000",
+    ]); // 100 ETH
+    await dst.provider.send("anvil_setBalance", [
+      await dstChainResolver.getAddress(),
+      "0x56BC75E2D630E000",
+    ]); // 100 ETH
 
     srcFactory = new EscrowFactory(src.provider, src.escrowFactory);
     dstFactory = new EscrowFactory(dst.provider, dst.escrowFactory);
@@ -131,14 +141,19 @@ describe("Resolving example", () => {
   }
 
   after(async () => {
-    src.provider.destroy();
-    dst.provider.destroy();
-    await Promise.all([src.node?.stop(), dst.node?.stop()]);
+    if (src?.provider) {
+      src.provider.destroy();
+    }
+    if (dst?.provider) {
+      dst.provider.destroy();
+    }
+    await Promise.all([src?.node?.stop(), dst?.node?.stop()].filter(Boolean));
   });
 
   // eslint-disable-next-line max-lines-per-function
   describe("Fill", () => {
-    it("should swap Ethereum USDC -> Bsc USDC. Single fill only", async () => {
+    it("should swap Ethereum USDC -> Bsc USDC. Single fill only", async function () {
+      this.timeout(120000); // 2 minute timeout
       const initialBalances = await getBalances(
         config.chain.source.tokens.USDC.address,
         config.chain.destination.tokens.USDC.address
@@ -296,19 +311,20 @@ describe("Resolving example", () => {
       expect(initialBalances.src.user - resultBalances.src.user).to.equal(
         order.makingAmount
       );
-      expect(resultBalances.src.resolver - initialBalances.src.resolver).to.equal(
-        order.makingAmount
-      );
+      expect(
+        resultBalances.src.resolver - initialBalances.src.resolver
+      ).to.equal(order.makingAmount);
       // resolver transferred funds to user on destination chain
       expect(resultBalances.dst.user - initialBalances.dst.user).to.equal(
         order.takingAmount
       );
-      expect(initialBalances.dst.resolver - resultBalances.dst.resolver).to.equal(
-        order.takingAmount
-      );
+      expect(
+        initialBalances.dst.resolver - resultBalances.dst.resolver
+      ).to.equal(order.takingAmount);
     });
 
-    it("should swap Ethereum USDC -> Bsc USDC. Multiple fills. Fill 100%", async () => {
+    it("should swap Ethereum USDC -> Bsc USDC. Multiple fills. Fill 100%", async function () {
+      this.timeout(120000); // 2 minute timeout
       const initialBalances = await getBalances(
         config.chain.source.tokens.USDC.address,
         config.chain.destination.tokens.USDC.address
@@ -486,19 +502,20 @@ describe("Resolving example", () => {
       expect(initialBalances.src.user - resultBalances.src.user).to.equal(
         order.makingAmount
       );
-      expect(resultBalances.src.resolver - initialBalances.src.resolver).to.equal(
-        order.makingAmount
-      );
+      expect(
+        resultBalances.src.resolver - initialBalances.src.resolver
+      ).to.equal(order.makingAmount);
       // resolver transferred funds to user on the destination chain
       expect(resultBalances.dst.user - initialBalances.dst.user).to.equal(
         order.takingAmount
       );
-      expect(initialBalances.dst.resolver - resultBalances.dst.resolver).to.equal(
-        order.takingAmount
-      );
+      expect(
+        initialBalances.dst.resolver - resultBalances.dst.resolver
+      ).to.equal(order.takingAmount);
     });
 
-    it("should swap Ethereum USDC -> Bsc USDC. Multiple fills. Fill 50%", async () => {
+    it("should swap Ethereum USDC -> Bsc USDC. Multiple fills. Fill 50%", async function () {
+      this.timeout(120000); // 2 minute timeout
       const initialBalances = await getBalances(
         config.chain.source.tokens.USDC.address,
         config.chain.destination.tokens.USDC.address
@@ -677,22 +694,23 @@ describe("Resolving example", () => {
       expect(initialBalances.src.user - resultBalances.src.user).to.equal(
         fillAmount
       );
-      expect(resultBalances.src.resolver - initialBalances.src.resolver).to.equal(
-        fillAmount
-      );
+      expect(
+        resultBalances.src.resolver - initialBalances.src.resolver
+      ).to.equal(fillAmount);
       // resolver transferred funds to user on the destination chain
       const dstAmount = (order.takingAmount * fillAmount) / order.makingAmount;
       expect(resultBalances.dst.user - initialBalances.dst.user).to.equal(
         dstAmount
       );
-      expect(initialBalances.dst.resolver - resultBalances.dst.resolver).to.equal(
-        dstAmount
-      );
+      expect(
+        initialBalances.dst.resolver - resultBalances.dst.resolver
+      ).to.equal(dstAmount);
     });
   });
 
   describe("Cancel", () => {
-    it("should cancel swap Ethereum USDC -> Bsc USDC", async () => {
+    it("should cancel swap Ethereum USDC -> Bsc USDC", async function () {
+      this.timeout(120000); // 2 minute timeout
       const initialBalances = await getBalances(
         config.chain.source.tokens.USDC.address,
         config.chain.destination.tokens.USDC.address
@@ -862,7 +880,7 @@ async function initChain(cnf: ChainConfig): Promise<{
     [
       cnf.limitOrderProtocol,
       cnf.wrappedNative, // feeToken,
-      Address.fromBigInt(0n).toString(), // accessToken,
+      "0x0000000000000000000000000000000000000000", // accessToken,
       deployer.address, // owner
       60 * 30, // src rescue delay
       60 * 30, // dst rescue delay
