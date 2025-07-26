@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "hardhat test"
   },
   "author": "",
   "license": "ISC",
@@ -28,6 +28,18 @@
     "solidity-coverage": "^0.8.0",
     "ts-node": ">=8.0.0",
     "typechain": "^8.3.0",
-    "typescript": ">=4.5.0"
+    "typescript": ">=4.5.0",
+    "zod": "3.23.8"
+  },
+  "dependencies": {
+    "@1inch/byte-utils": "2.6.0",
+    "@1inch/cross-chain-sdk": "v0.1.15-rc.0",
+    "@1inch/limit-order-protocol-contract": "https://github.com/1inch/limit-order-protocol#4.3.0",
+    "@1inch/limit-order-settlement": "2.1.0",
+    "@1inch/solidity-utils": "^6.6.0",
+    "@jest/globals": "^30.0.5",
+    "@openzeppelin/contracts": "^5.4.0",
+    "dotenv": "16.4.5",
+    "prool": "^0.0.24"
   }
 }
