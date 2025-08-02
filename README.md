@@ -1,3 +1,5 @@
+# GhostMesh
+
 ## Market situation
 
 As on-chain finance continues to grow, a diverse landscape of decentralized financial products is rapidly emerging across multiple blockchain ecosystems. Despite the inherent transparency of blockchain technology, there is a strong and rising demand—particularly from professional traders and institutional participants—for solutions that deliver greater operational convenience, robust security, and enhanced privacy.
@@ -24,17 +26,25 @@ yarn deploy:lop:sepolia
 yarn deploy:lop:arbitrum
 yarn deploy:factory:sepolia
 yarn deploy:factory:arbitrum
+yarn deploy:factory:arbitrum
+deploy:resolver:sepolia
+deploy:resolver:arbitrum
 yarn setup:mock-tokens
 yarn mint:mock-tokens
+<!-- user swap 1000 mockusdc in sepolia for 1 mockweht arbitrum sepoliam, before exeucte make sure
+user and resolver have enough token -->
+yarn test:cross-chain
 
 ```
 
-1. [address-lop:sepolia](https://sepolia.etherscan.io/address/0x5E3CE1C16004d5b70305191C4bdCc61f151B40e5)
-2. [address-lop:arbitrum](https://sepolia.arbiscan.io/address/0xB6A11d4b7Ede8aB816277B5080615DCC52Cc1B3F)
-3. [address-factory:sepolia](https://sepolia.etherscan.io/address/0xa3D3ec93ec51Ee02AD04ae176ED9d0b32e469491)
-4. [address-factory:arbitrum](https://sepolia.arbiscan.io/address/0xBF5F3c3aB8c9B9102EDD73C535ddAaCce3191B34)
-5. [address-mockusdc:sepolia](https://sepolia.etherscan.io/address/0xE6B9EeFbb9665293f1dbF0449B7c645DC39De549)
-6. [address-mockweth:arbitrum](https://sepolia.arbiscan.io/address/0x522BBb1450d0e41EcEC8C9BC53b9c0fc1F3F9c87)
+1. [address-lop:sepolia](https://sepolia.etherscan.io/address/0xC04dADf6F30586bD15ecA92C5e8Bf7604e35C63E#code)
+2. [address-lop:arbitrum](https://sepolia.arbiscan.io/address/0xe9E8D21385686809c81A245B4cfC278362323DF2#code)
+3. [address-factory:sepolia](https://sepolia.etherscan.io/address/0x8A613AE9898979616FDE4f6e70B9372E0C88834b#code)
+4. [address-factory:arbitrum](https://sepolia.arbiscan.io/address/0xF6abe8D656CED251FA03E29C865BB2dEb9E9A203#code)
+5. [address-resolver:sepolia](https://sepolia.etherscan.io/address/0x8785E6Fb819cae9b59A38781aeb0ec76458Bd082#code)
+6. [address-resolver:arbitrum](https://sepolia.arbiscan.io/address/0x1A328ddC7FaE7B25F7DBe4f56D6591BabA4a6DE7#code)
+7. [address-mockusdc:sepolia](https://sepolia.etherscan.io/address/0xE6B9EeFbb9665293f1dbF0449B7c645DC39De549)
+8. [address-mockweth:arbitrum](https://sepolia.arbiscan.io/address/0x522BBb1450d0e41EcEC8C9BC53b9c0fc1F3F9c87)
 
 ```
 yarn -v 1.22.22

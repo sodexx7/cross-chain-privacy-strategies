@@ -30,14 +30,17 @@ library TakerTraitsLib {
     uint256 private constant _ARGS_INTERACTION_LENGTH_OFFSET = 200;
     uint256 private constant _ARGS_INTERACTION_LENGTH_MASK = 0xffffff;
 
-    uint256 private constant _AMOUNT_MASK = 0x000000000000000000ffffffffffffffffffffffffffffffffffffffffffffff;
+    uint256 private constant _AMOUNT_MASK =
+        0x000000000000000000ffffffffffffffffffffffffffffffffffffffffffffff;
 
     /**
      * @notice Checks if the args should contain target address.
      * @param takerTraits The traits of the taker.
      * @return result A boolean indicating whether the args should contain target address.
      */
-    function argsHasTarget(TakerTraits takerTraits) internal pure returns (bool) {
+    function argsHasTarget(
+        TakerTraits takerTraits
+    ) internal pure returns (bool) {
         return (TakerTraits.unwrap(takerTraits) & _ARGS_HAS_TARGET) != 0;
     }
 
@@ -46,8 +49,12 @@ library TakerTraitsLib {
      * @param takerTraits The traits of the taker.
      * @return result The length of the extension calldata encoded in the takerTraits.
      */
-    function argsExtensionLength(TakerTraits takerTraits) internal pure returns (uint256) {
-        return (TakerTraits.unwrap(takerTraits) >> _ARGS_EXTENSION_LENGTH_OFFSET) & _ARGS_EXTENSION_LENGTH_MASK;
+    function argsExtensionLength(
+        TakerTraits takerTraits
+    ) internal pure returns (uint256) {
+        return
+            (TakerTraits.unwrap(takerTraits) >> _ARGS_EXTENSION_LENGTH_OFFSET) &
+            _ARGS_EXTENSION_LENGTH_MASK;
     }
 
     /**
@@ -55,8 +62,13 @@ library TakerTraitsLib {
      * @param takerTraits The traits of the taker.
      * @return result The length of the interaction calldata encoded in the takerTraits.
      */
-    function argsInteractionLength(TakerTraits takerTraits) internal pure returns (uint256) {
-        return (TakerTraits.unwrap(takerTraits) >> _ARGS_INTERACTION_LENGTH_OFFSET) & _ARGS_INTERACTION_LENGTH_MASK;
+    function argsInteractionLength(
+        TakerTraits takerTraits
+    ) internal pure returns (uint256) {
+        return
+            (TakerTraits.unwrap(takerTraits) >>
+                _ARGS_INTERACTION_LENGTH_OFFSET) &
+            _ARGS_INTERACTION_LENGTH_MASK;
     }
 
     /**
@@ -64,7 +76,9 @@ library TakerTraitsLib {
      * @param takerTraits The traits of the taker.
      * @return result A boolean indicating whether the taking amount should be calculated based on making amount.
      */
-    function isMakingAmount(TakerTraits takerTraits) internal pure returns (bool) {
+    function isMakingAmount(
+        TakerTraits takerTraits
+    ) internal pure returns (bool) {
         return (TakerTraits.unwrap(takerTraits) & _MAKER_AMOUNT_FLAG) != 0;
     }
 
@@ -82,7 +96,9 @@ library TakerTraitsLib {
      * @param takerTraits The traits of the taker.
      * @return result A boolean indicating whether the order don't apply permit.
      */
-    function skipMakerPermit(TakerTraits takerTraits) internal pure returns (bool) {
+    function skipMakerPermit(
+        TakerTraits takerTraits
+    ) internal pure returns (bool) {
         return (TakerTraits.unwrap(takerTraits) & _SKIP_ORDER_PERMIT_FLAG) != 0;
     }
 
@@ -101,7 +117,9 @@ library TakerTraitsLib {
      * @param takerTraits The traits of the taker.
      * @return result The threshold amount encoded in the takerTraits.
      */
-    function threshold(TakerTraits takerTraits) internal pure returns (uint256) {
+    function threshold(
+        TakerTraits takerTraits
+    ) internal pure returns (uint256) {
         return TakerTraits.unwrap(takerTraits) & _AMOUNT_MASK;
     }
 }

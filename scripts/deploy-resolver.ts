@@ -1,11 +1,22 @@
-import { ethers } from 'ethers';
+import 'dotenv/config';
+import { ethers, computeAddress } from 'ethers';
 import { testnetConfig } from './deploy-config';
-import limitOrderProtocolContract from '../artifacts/contracts/1inch/limited_order/contracts/LimitOrderProtocol.sol/LimitOrderProtocol.json';
+import resolverContract from '../artifacts/contracts/resolver/Resolver.sol/Resolver.json';
 
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
+
+// Private key for the resolver owner from environment variables
+const resolverOwnerPk = process.env.RESOLVER_PRIVATE_KEY;
+
+if (!resolverOwnerPk) {
+    throw new Error('RESOLVER_PRIVATE_KEY environment variable is required');
+}
+
+// Ensure private key has 0x prefix
+const formattedResolverOwnerPk = resolverOwnerPk.startsWith('0x') ? resolverOwnerPk : `0x${resolverOwnerPk}`;
 
 async function verifyContract(contractAddress: string, constructorArgs: any[], networkName: string) {
     console.log(`Verifying contract at ${contractAddress}...`);
@@ -40,14 +51,14 @@ async function verifyContract(contractAddress: string, constructorArgs: any[], n
     }
 }
 
-async function deployLimitOrderProtocol(chainName: keyof typeof testnetConfig.chains) {
+async function deployResolver(chainName: keyof typeof testnetConfig.chains) {
     const chainConfig = testnetConfig.chains[chainName];
 
     if (!chainConfig) {
         throw new Error(`Chain configuration not found for: ${chainName}`);
     }
 
-    console.log(`\n=== Deploying LimitOrderProtocol on ${chainConfig.name} ===`);
+    console.log(`\n=== Deploying Resolver on ${chainConfig.name} ===`);
     console.log(`Chain ID: ${chainConfig.chainId}`);
     console.log(`RPC URL: ${chainConfig.rpcUrl}`);
 
@@ -65,32 +76,48 @@ async function deployLimitOrderProtocol(chainName: keyof typeof testnetConfig.ch
         throw new Error('Insufficient balance for deployment. Need at least 0.01 ETH');
     }
 
-    // Deploy LimitOrderProtocol with WETH parameter
+    // Get the known EscrowFactory and LimitOrderProtocol addresses
+    const escrowFactoryAddress = getEscrowFactoryAddress(chainName);
+    const limitOrderProtocolAddress = getLimitOrderProtocolAddress(chainName);
+
+    // Compute resolver owner address from private key
+    const resolverOwnerAddress = computeAddress(formattedResolverOwnerPk);
+
+    // Deploy Resolver with required parameters
     const deployParams = [
-        chainConfig.wrappedNative, // WETH address
+        escrowFactoryAddress, // escrowFactory
+        limitOrderProtocolAddress, // limitOrderProtocol
+        resolverOwnerAddress, // owner (resolver address)
     ];
 
     console.log(`\nDeploying with parameters:`);
-    console.log(`- WETH address: ${deployParams[0]}`);
+    console.log(`- EscrowFactory address: ${deployParams[0]}`);
+    console.log(`- LimitOrderProtocol address: ${deployParams[1]}`);
+    console.log(`- Resolver owner address: ${deployParams[2]}`);
 
-    const factory = new ethers.ContractFactory(limitOrderProtocolContract.abi, limitOrderProtocolContract.bytecode, deployer);
+    const factory = new ethers.ContractFactory(resolverContract.abi, resolverContract.bytecode, deployer);
 
-    console.log(`\nDeploying LimitOrderProtocol contract...`);
-    const limitOrderProtocol = await factory.deploy(...deployParams);
+    console.log(`\nDeploying Resolver contract...`);
+    const resolver = await factory.deploy(...deployParams);
 
-    console.log(`Transaction hash: ${limitOrderProtocol.deploymentTransaction()?.hash}`);
+    console.log(`Transaction hash: ${resolver.deploymentTransaction()?.hash}`);
     console.log(`Waiting for deployment confirmation...`);
 
-    await limitOrderProtocol.waitForDeployment();
+    await resolver.waitForDeployment();
 
-    const address = await limitOrderProtocol.getAddress();
-    console.log(`\n✅ LimitOrderProtocol deployed to: ${address}`);
+    const address = await resolver.getAddress();
+    console.log(`\n✅ Resolver deployed to: ${address}`);
 
     // Verify deployment by calling a view function
     try {
-        const contract = limitOrderProtocol as any;
-        const domainSeparator = await contract.DOMAIN_SEPARATOR();
-        console.log(`✅ Contract verification successful - Domain Separator: ${domainSeparator}`);
+        const contract = resolver as any;
+        const owner = await contract.owner();
+        console.log(`✅ Contract verification successful - Owner: ${owner}`);
+
+        const escrowFactory = await contract.escrowFactory();
+        const limitOrderProtocol = await contract.limitOrderProtocol();
+        console.log(`✅ EscrowFactory set to: ${escrowFactory}`);
+        console.log(`✅ LimitOrderProtocol set to: ${limitOrderProtocol}`);
     } catch (error) {
         console.warn(`⚠️ Contract verification failed:`, error);
     }
@@ -111,12 +138,12 @@ async function deployLimitOrderProtocol(chainName: keyof typeof testnetConfig.ch
     const deploymentInfo = {
         network: chainConfig.name,
         chainId: chainConfig.chainId,
-        contractName: 'LimitOrderProtocol',
+        contractName: 'Resolver',
         address: address,
         deployer: deployer.address,
         timestamp: new Date().toISOString(),
         constructorArgs: deployParams,
-        transactionHash: limitOrderProtocol.deploymentTransaction()?.hash,
+        transactionHash: resolver.deploymentTransaction()?.hash,
     };
 
     console.log(`\nDeployment Summary:`);
@@ -125,19 +152,47 @@ async function deployLimitOrderProtocol(chainName: keyof typeof testnetConfig.ch
     return deploymentInfo;
 }
 
+function getEscrowFactoryAddress(chainName: keyof typeof testnetConfig.chains): string {
+    const addresses = {
+        sepolia: '0xa3D3ec93ec51Ee02AD04ae176ED9d0b32e469491',
+        arbTestnet: '0xBF5F3c3aB8c9B9102EDD73C535ddAaCce3191B34',
+    };
+
+    const address = addresses[chainName];
+    if (!address) {
+        throw new Error(`EscrowFactory address not found for chain: ${chainName}`);
+    }
+
+    return address;
+}
+
+function getLimitOrderProtocolAddress(chainName: keyof typeof testnetConfig.chains): string {
+    const addresses = {
+        sepolia: '0x5E3CE1C16004d5b70305191C4bdCc61f151B40e5',
+        arbTestnet: '0xB6A11d4b7Ede8aB816277B5080615DCC52Cc1B3F',
+    };
+
+    const address = addresses[chainName];
+    if (!address) {
+        throw new Error(`LimitOrderProtocol address not found for chain: ${chainName}`);
+    }
+
+    return address;
+}
+
 // Main execution
 async function main() {
     const chainName = (process.env.CHAIN_NAME || process.argv[2]) as keyof typeof testnetConfig.chains;
 
     if (!chainName) {
-        console.log('Usage: CHAIN_NAME=<chainName> ts-node scripts/deploy-lop.ts');
+        console.log('Usage: CHAIN_NAME=<chainName> ts-node scripts/deploy-resolver.ts');
         console.log('Available chains:', Object.keys(testnetConfig.chains).join(', '));
         console.log('\nExample:');
-        console.log('  CHAIN_NAME=sepolia ts-node scripts/deploy-lop.ts');
-        console.log('  CHAIN_NAME=arbTestnet ts-node scripts/deploy-lop.ts');
+        console.log('  CHAIN_NAME=sepolia ts-node scripts/deploy-resolver.ts');
+        console.log('  CHAIN_NAME=arbTestnet ts-node scripts/deploy-resolver.ts');
         console.log('\nOr use yarn scripts:');
-        console.log('  yarn deploy:lop:sepolia');
-        console.log('  yarn deploy:lop:arbitrum');
+        console.log('  yarn deploy:resolver:sepolia');
+        console.log('  yarn deploy:resolver:arbitrum');
         process.exit(1);
     }
 
@@ -148,7 +203,7 @@ async function main() {
     }
 
     try {
-        await deployLimitOrderProtocol(chainName);
+        await deployResolver(chainName);
     } catch (error) {
         console.error('Deployment failed:', error);
         process.exit(1);
@@ -162,4 +217,4 @@ if (require.main === module) {
     });
 }
 
-export { deployLimitOrderProtocol };
+export { deployResolver };

@@ -161,6 +161,42 @@ describe("Resolving example", () => {
 
       // User creates order
       const secret = uint8ArrayToHex(randomBytes(32)); // note: use crypto secure random number in real world
+      // static new(escrowFactory: Address, orderInfo: CrossChainOrderInfo, escrowParams: EscrowParams, details: Details, extra?: Extra): CrossChainOrder;
+
+      // private inner;
+      // private constructor();
+      // get dstChainId(): NetworkEnum;
+      // get escrowExtension(): EscrowExtension;
+      // get extension(): Extension;
+      // get maker(): Address;
+      // get takerAsset(): Address;
+      // get makerAsset(): Address;
+      // get takingAmount(): bigint;
+      // get makingAmount(): bigint;
+      // get salt(): bigint;
+
+      //     type EscrowParams = {
+      //     hashLock: HashLock;
+      //     srcChainId: SupportedChain;
+      //     dstChainId: SupportedChain;
+      //     srcSafetyDeposit: bigint;
+      //     dstSafetyDeposit: bigint;
+      //     timeLocks: TimeLocks;
+      // };
+
+      // export type Details = {
+      //     auction: AuctionDetails;
+      //     fees?: {
+      //         integratorFee?: IntegratorFee;
+      //         bankFee?: bigint;
+      //     };
+      //     whitelist: AuctionWhitelistItem[];
+      //     /**
+      //      * Time from which order can be executed
+      //      */
+      //     resolvingStartTime?: bigint;
+      // };
+
       const order = Sdk.CrossChainOrder.new(
         new Address(src.escrowFactory),
         {
@@ -212,11 +248,23 @@ describe("Resolving example", () => {
       const signature = await srcChainUser.signOrder(srcChainId, order);
       const orderHash = order.getOrderHash(srcChainId);
       // Resolver fills order
+      // simplilfy the contrsutor ???
       const resolverContract = new Resolver(src.resolver, dst.resolver);
 
       console.log(`[${srcChainId}]`, `Filling order ${orderHash}`);
 
+      //    function deploySrc(
+      //     IBaseEscrow.Immutables calldata immutables,
+      //     IOrderMixin.Order calldata order,
+      //     bytes32 r,
+      //     bytes32 vs,
+      //     uint256 amount,
+      //     TakerTraits takerTraits,
+      //     bytes calldata args
+      // ) external payable onlyOwner {
+      // TODO check there can add my own logic
       const fillAmount = order.makingAmount;
+      // TODO. there are some difference between deploySrc and Resolver.sol deploySrc
       const { txHash: orderFillHash, blockHash: srcDeployBlock } =
         await srcChainResolver.send(
           resolverContract.deploySrc(
