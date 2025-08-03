@@ -17,5 +17,5 @@ node_modules
 ignition/deployments/chain-31337
 
 
-scripts/helper.ts
-scripts/test-cross-chain-swap.ts
+.DS_Store
+.prettierrc
