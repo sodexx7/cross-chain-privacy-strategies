@@ -1,6 +1,7 @@
 import { id, Interface, JsonRpcProvider } from 'ethers';
-import * as Sdk from '@1inch/cross-chain-sdk';
-import EscrowFactoryContract from '../../artifacts/contracts/1inch/cross-chain-swap/contracts/EscrowFactory.sol/EscrowFactory.json';
+import * as Sdk from '../custome-sdk-cross-chain/dist/cjs'; // modified sdk.
+
+import EscrowFactoryContract from '../artifacts/contracts/resolver/TestEscrowFactory.sol/TestEscrowFactory.json';
 
 export class EscrowFactory {
     private iface = new Interface(EscrowFactoryContract.abi);
@@ -30,6 +31,9 @@ export class EscrowFactory {
     }
 
     public async getSrcDeployEvent(blockHash: string): Promise<[Sdk.Immutables, Sdk.DstImmutablesComplement]> {
+        console.log('⏳ Waiting 1 minute for block processing...');
+        await new Promise(resolve => setTimeout(resolve, 60000)); // Wait 1 minute (60000ms)
+        console.log('✅ Wait complete, proceeding with event retrieval...');
         const event = this.iface.getEvent('SrcEscrowCreated')!;
         const logs = await this.provider.getLogs({
             blockHash,

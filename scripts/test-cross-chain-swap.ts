@@ -6,10 +6,10 @@ import * as Sdk from '../custome-sdk-cross-chain/dist/cjs'; // modified sdk.
 import { uint8ArrayToHex, UINT_40_MAX } from '@1inch/byte-utils';
 
 import { Wallet } from '../scripts/wallet';
-import { EscrowFactory } from '../test/resolver/escrow-factory';
+import { EscrowFactory } from '../scripts/escrow-factory';
 import { Resolver } from '../scripts/resolver';
 
-import { parseEther, JsonRpcProvider, MaxUint256, randomBytes, parseUnits, TypedDataDomain } from 'ethers';
+import { parseEther, JsonRpcProvider, MaxUint256, randomBytes, parseUnits, Interface } from 'ethers';
 
 const { Address } = Sdk;
 /**
@@ -19,54 +19,36 @@ const { Address } = Sdk;
  * 2. User at least have 1000 mockUSDC  approve 1000 mockUSDC for LOP in sepolia and
  * 3. resolverContract in arbitrum sepolia should have at least 1 mockWETH and approve 1 mockweth for escrowFactory in arbitrum
  *
- *
- * Doing:
- *
- * user approve 1000 mockUSDC for lop in sepolia
- * resolverContract in arbitrum sepolia  should get 1 mockWETH and approve escrowFactory
- *
- *
  */
 
 /**
- * Step-by-Step Cross-Chain Swap Test Script
- * Swaps MockUSDC (Sepolia) -> MockWETH (Arbitrum) at 1000:1 rate
- * Actually executes on-chain contract calls based on main.spec.ts patterns
- */
-
-/**
- * 
- * ?? when to share the secret?
- * 
- * 
- * phase1: 
+ *
+ * phase1:
  *      The maker signs and issues a 1inch Fusion atomic or-
  *       der and secret hash to the 1inch Network, signaling
  *       their intent to make a cross-chain swap
  *       relayers share the order. for below scripts, resolver directly get the order and secret
  *
- *
- * 
  * phase2: Deposit phase (for below scripts, resolver as the taker)
-              The resolver deposits the maker’s tokens into the
-              source chain escrow contract. The escrow incorporates
-              the secret hash, token type and amount, target address,
-              and timelock specifications for both chains.
-
-              4. The resolver deposits the taker amount into the escrow
-              contract on the destination chain, employing the same
-              secret hash and providing relevant escrow details.
- *    
- *    
+ *             The resolver deposits the maker’s tokens into the
+ *             source chain escrow contract. The escrow incorporates
+ *             the secret hash, token type and amount, target address,
+ *             and timelock specifications for both chains.
+ *
+ *              4. The resolver deposits the taker amount into the escrow
+ *             contract on the destination chain, employing the same
+ *             secret hash and providing relevant escrow details.
+ *
+ *
  * Phase 3: Withdrawal Phase
- *        
+ *
  *        Utilizing the secret, the resolver unlocks their assets on
-          the source chain, simultaneously revealing the secret to
-          the public.
-
-           The resolver then uses the same secret to unlock the as-
-          sets for the maker from the destination chain’s escrow,
-          thereby finalizing the swap.
+ *         the source chain, simultaneously revealing the secret to
+ *         the public.
+ *
+ *          The resolver then uses the same secret to unlock the as-
+ *         sets for the maker from the destination chain’s escrow,
+ *         thereby finalizing the swap.
  */
 
 class CrossChainSwapTest {
@@ -137,6 +119,19 @@ class CrossChainSwapTest {
 
         // dstResolverContract approve mockWETH for escrowFactory
         await this.dstResolverContract.unlimitedApprove(this.dstChainConfig.mockWETH, this.dstChainConfig.escrowFactory);
+
+        const resolverInterface = new Interface(['function arbitraryCalls(address[] calldata targets, bytes[] calldata arguments)']);
+        const erc20Interface = new Interface(['function approve(address spender, uint256 amount)']);
+
+        const arbitraryCallsData = resolverInterface.encodeFunctionData('arbitraryCalls', [
+            [testnetConfig.chains.arbTestnet.mockWETH], // targets array
+            [erc20Interface.encodeFunctionData('approve', [this.dstChainConfig.escrowFactory, ethers.MaxUint256])], // arguments array
+        ]);
+        // Send the transaction
+        await this.dstChainResolver.send({
+            to: this.dstChainConfig.resolver,
+            data: arbitraryCallsData,
+        });
     }
 
     async getBalances(
@@ -275,8 +270,6 @@ async function main(): Promise<void> {
     );
 
     const signature = await crossChainSwap.srcChainUser.signOrder(srcChainId, order);
-
-    // should use below instead of order.order.getOrderHash, which apply the original customDoamin
     const orderHash = order.getOrderHash(srcChainId);
 
     // Parse signature to get r and vs components
@@ -360,7 +353,44 @@ async function main(): Promise<void> {
         )
     );
 
-    console.log(`[${srcChainId}]`, `Order ${orderHash} filled for ${fillAmount} in tx ${orderFillHash}`);
+    console.log(`[${srcChainId}]`, `srcDeployBlock ${srcDeployBlock} Order ${orderHash} filled for ${fillAmount} in tx ${orderFillHash}`);
+
+    return;
+    // The following us under developing
+    // Doing check time confirmaiton in desinaiton
+    //// below deal dst chain
+    // check: should make sure resolverContract have enough taker token
+    //  srcDeployBlock = '0x30b861555e2ae46d5ff819b53f2f2b78e26485cc97cd9dfb92bdefb4e73dca9f';
+    const srcEscrowEvent = await crossChainSwap.srcEscrowFactory.getSrcDeployEvent(
+        '0x30b861555e2ae46d5ff819b53f2f2b78e26485cc97cd9dfb92bdefb4e73dca9f'
+    );
+
+    const dstImmutables = srcEscrowEvent[0].withComplement(srcEscrowEvent[1]).withTaker(new Address(resolverContract.dstAddress));
+
+    console.log(`[${dstChainId}]`, `Depositing ${dstImmutables.amount} for order ${orderHash}`);
+    const { txHash: dstDepositHash, blockTimestamp: dstDeployedAt } = await crossChainSwap.dstChainResolver.send(
+        resolverContract.deployDst(dstImmutables)
+    );
+    console.log(`[${dstChainId}]`, `Created dst deposit for order ${orderHash} in tx ${dstDepositHash}`);
+
+    const ESCROW_SRC_IMPLEMENTATION = await crossChainSwap.srcEscrowFactory.getSourceImpl();
+    const ESCROW_DST_IMPLEMENTATION = await crossChainSwap.dstEscrowFactory.getDestinationImpl();
+
+    const srcEscrowAddress = new Sdk.EscrowFactory(new Address(crossChainSwap.srcChainConfig.escrowFactory)).getSrcEscrowAddress(
+        srcEscrowEvent[0],
+        ESCROW_SRC_IMPLEMENTATION
+    );
+
+    const dstEscrowAddress = new Sdk.EscrowFactory(new Address(crossChainSwap.dstChainConfig.escrowFactory)).getDstEscrowAddress(
+        srcEscrowEvent[0],
+        srcEscrowEvent[1],
+        dstDeployedAt,
+        new Address(resolverContract.dstAddress),
+        ESCROW_DST_IMPLEMENTATION
+    );
+
+    // User shares key after validation of dst escrow deployment
+    console.log(`[${dstChainId}]`, `Withdrawing funds for user from ${dstEscrowAddress}`);
 }
 
 // Run the test if this file is executed directly
