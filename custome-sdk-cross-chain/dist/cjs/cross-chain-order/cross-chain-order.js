@@ -10,6 +10,7 @@ const deployments_1 = require("../deployments");
 const chains_1 = require("../chains");
 const immutables_1 = require("../immutables");
 const ethers_1 = require("ethers");
+const deploy_config_1 = require("../deploy-config");
 class CrossChainOrder {
     constructor(extension, orderInfo, extra) {
         this.inner = new inner_order_1.InnerOrder(extension, orderInfo, extra);
@@ -132,28 +133,52 @@ class CrossChainOrder {
         return this.inner.build();
     }
     getOrderHash(srcChainId) {
+        // Get the correct LimitOrderProtocol contract address for the chain
+        let verifyingContract;
+        if (srcChainId === 11155111) {
+            // Sepolia
+            verifyingContract = deploy_config_1.testnetConfig.chains.sepolia.limitOrderProtocol;
+        }
+        else if (srcChainId === 421614) {
+            // Arbitrum Sepolia
+            verifyingContract =
+                deploy_config_1.testnetConfig.chains.arbTestnet.limitOrderProtocol;
+        }
+        else {
+            throw new Error(`Unsupported chain ID: ${srcChainId}`);
+        }
         // Use custom domain for hash generation
         const customDomain = {
             name: '1inch Limit Order Protocol',
             version: '4',
             chainId: srcChainId,
-            verifyingContract: srcChainId === 11155111
-                ? '0xC04dADf6F30586bD15ecA92C5e8Bf7604e35C63E' // Sepolia
-                : '0xe9E8D21385686809c81A245B4cfC278362323DF2' // Arbitrum Sepolia
+            verifyingContract: verifyingContract
         };
         const typedData = this.inner.getTypedData(srcChainId);
         return ethers_1.TypedDataEncoder.hash(customDomain, { Order: typedData.types[typedData.primaryType] }, typedData.message);
     }
     getTypedData(srcChainId) {
         const originalTypedData = this.inner.getTypedData(srcChainId);
+        // Get the correct LimitOrderProtocol contract address for the chain
+        let verifyingContract;
+        if (srcChainId === 11155111) {
+            // Sepolia
+            verifyingContract = deploy_config_1.testnetConfig.chains.sepolia.limitOrderProtocol;
+        }
+        else if (srcChainId === 421614) {
+            // Arbitrum Sepolia
+            verifyingContract =
+                deploy_config_1.testnetConfig.chains.arbTestnet.limitOrderProtocol;
+        }
+        else {
+            throw new Error(`Unsupported chain ID: ${srcChainId}`);
+        }
         // Use custom domain
         const customDomain = {
             name: '1inch Limit Order Protocol',
             version: '4',
             chainId: srcChainId,
-            verifyingContract: srcChainId === 11155111
-                ? '0xC04dADf6F30586bD15ecA92C5e8Bf7604e35C63E'
-                : '0xe9E8D21385686809c81A245B4cfC278362323DF2'
+            verifyingContract: verifyingContract
         };
         return {
             ...originalTypedData,

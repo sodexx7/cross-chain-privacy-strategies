@@ -41,8 +41,8 @@ yarn test:cross-chain
 2. [address-lop:arbitrum](https://sepolia.arbiscan.io/address/0xe9E8D21385686809c81A245B4cfC278362323DF2#code)
 3. [address-factory:sepolia](https://sepolia.etherscan.io/address/0x8A613AE9898979616FDE4f6e70B9372E0C88834b#code)
 4. [address-factory:arbitrum](https://sepolia.arbiscan.io/address/0xF6abe8D656CED251FA03E29C865BB2dEb9E9A203#code)
-5. [address-resolver:sepolia](https://sepolia.etherscan.io/address/0x8785E6Fb819cae9b59A38781aeb0ec76458Bd082#code)
-6. [address-resolver:arbitrum](https://sepolia.arbiscan.io/address/0x1A328ddC7FaE7B25F7DBe4f56D6591BabA4a6DE7#code)
+5. [address-resolver:sepolia](https://sepolia.etherscan.io/address/0x0968bD1359E5025bF98861Df098Ea6be1A828A73#code)
+6. [address-resolver:arbitrum](https://sepolia.arbiscan.io/address/0xF81e2C3980CDbaD35DF8ce8d85BE46e238a68b17#code)
 7. [address-mockusdc:sepolia](https://sepolia.etherscan.io/address/0xE6B9EeFbb9665293f1dbF0449B7c645DC39De549)
 8. [address-mockweth:arbitrum](https://sepolia.arbiscan.io/address/0x522BBb1450d0e41EcEC8C9BC53b9c0fc1F3F9c87)
 

@@ -184,6 +184,28 @@ async function printBalance(crossChainSwap: CrossChainSwapTest, initialBalances:
     console.log(`  User MockWETH: ${ethers.formatEther(initialBalances.dst.user)} WETH`);
 }
 
+function test() {
+    console.log('🧪 Testing ECDSA.recover function');
+    console.log('==================================');
+
+    // Example data from your comment
+    // const orderHash = '0x9a443fdefa8405f59121569d62511a8ed0df94e34fe69964bef200eed816be5a';
+    const orderHash = '0x2521ebe3a4df3f4233a768008b3ae5a3ec273dd753f4a09a88aae9e3050e147f';
+
+    //
+    const r = '0x6e2b73d4b8cfa21c95b15e72171368823138caaf3de8df07a40133739ac1feba';
+    const vs = '0xa7c18c637b5136caed91403ac3a20c44d5eb98d58c8d2aa67643b6f9852b3d28';
+
+    try {
+        // Method 1: Using ethers.recoverAddress (recommended)
+        const recoveredAddress1 = ethers.recoverAddress(orderHash, { r, yParityAndS: vs });
+        console.log('✅ Method 1 - ethers.recoverAddress:');
+        console.log('   Recovered Address:', recoveredAddress1);
+    } catch (error) {
+        console.error('❌ Error during ECDSA recovery:', error);
+    }
+}
+
 /**
  * Main function to run the cross-chain swap test
  */

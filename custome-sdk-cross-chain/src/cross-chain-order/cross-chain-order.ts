@@ -20,6 +20,7 @@ import {TRUE_ERC20} from '../deployments'
 import {isSupportedChain, SupportedChain} from '../chains'
 import {Immutables} from '../immutables'
 import {TypedDataEncoder} from 'ethers'
+import {testnetConfig} from '../deploy-config'
 
 export class CrossChainOrder {
     private inner: InnerOrder
@@ -215,15 +216,26 @@ export class CrossChainOrder {
     }
 
     public getOrderHash(srcChainId: number): string {
+        // Get the correct LimitOrderProtocol contract address for the chain
+        let verifyingContract: string
+
+        if (srcChainId === 11155111) {
+            // Sepolia
+            verifyingContract = testnetConfig.chains.sepolia.limitOrderProtocol
+        } else if (srcChainId === 421614) {
+            // Arbitrum Sepolia
+            verifyingContract =
+                testnetConfig.chains.arbTestnet.limitOrderProtocol
+        } else {
+            throw new Error(`Unsupported chain ID: ${srcChainId}`)
+        }
+
         // Use custom domain for hash generation
         const customDomain = {
             name: '1inch Limit Order Protocol',
             version: '4',
             chainId: srcChainId,
-            verifyingContract:
-                srcChainId === 11155111
-                    ? '0xC04dADf6F30586bD15ecA92C5e8Bf7604e35C63E' // Sepolia
-                    : '0xe9E8D21385686809c81A245B4cfC278362323DF2' // Arbitrum Sepolia
+            verifyingContract: verifyingContract
         }
 
         const typedData = this.inner.getTypedData(srcChainId)
@@ -238,15 +250,26 @@ export class CrossChainOrder {
     public getTypedData(srcChainId: number): EIP712TypedData {
         const originalTypedData = this.inner.getTypedData(srcChainId)
 
+        // Get the correct LimitOrderProtocol contract address for the chain
+        let verifyingContract: string
+
+        if (srcChainId === 11155111) {
+            // Sepolia
+            verifyingContract = testnetConfig.chains.sepolia.limitOrderProtocol
+        } else if (srcChainId === 421614) {
+            // Arbitrum Sepolia
+            verifyingContract =
+                testnetConfig.chains.arbTestnet.limitOrderProtocol
+        } else {
+            throw new Error(`Unsupported chain ID: ${srcChainId}`)
+        }
+
         // Use custom domain
         const customDomain = {
             name: '1inch Limit Order Protocol',
             version: '4',
             chainId: srcChainId,
-            verifyingContract:
-                srcChainId === 11155111
-                    ? '0xC04dADf6F30586bD15ecA92C5e8Bf7604e35C63E'
-                    : '0xe9E8D21385686809c81A245B4cfC278362323DF2'
+            verifyingContract: verifyingContract
         }
 
         return {

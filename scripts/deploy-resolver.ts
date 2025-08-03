@@ -9,11 +9,7 @@ import { promisify } from 'util';
 const execAsync = promisify(exec);
 
 // Private key for the resolver owner from environment variables
-const resolverOwnerPk = process.env.RESOLVER_PRIVATE_KEY;
-
-if (!resolverOwnerPk) {
-    throw new Error('RESOLVER_PRIVATE_KEY environment variable is required');
-}
+const resolverOwnerPk = testnetConfig.resolverPrivateKey;
 
 // Ensure private key has 0x prefix
 const formattedResolverOwnerPk = resolverOwnerPk.startsWith('0x') ? resolverOwnerPk : `0x${resolverOwnerPk}`;
@@ -76,9 +72,9 @@ async function deployResolver(chainName: keyof typeof testnetConfig.chains) {
         throw new Error('Insufficient balance for deployment. Need at least 0.01 ETH');
     }
 
-    // Get the known EscrowFactory and LimitOrderProtocol addresses
-    const escrowFactoryAddress = getEscrowFactoryAddress(chainName);
-    const limitOrderProtocolAddress = getLimitOrderProtocolAddress(chainName);
+    // Get the EscrowFactory and LimitOrderProtocol addresses from config
+    const escrowFactoryAddress = chainConfig.escrowFactory;
+    const limitOrderProtocolAddress = chainConfig.limitOrderProtocol;
 
     // Compute resolver owner address from private key
     const resolverOwnerAddress = computeAddress(formattedResolverOwnerPk);
@@ -150,34 +146,6 @@ async function deployResolver(chainName: keyof typeof testnetConfig.chains) {
     console.log(JSON.stringify(deploymentInfo, null, 2));
 
     return deploymentInfo;
-}
-
-function getEscrowFactoryAddress(chainName: keyof typeof testnetConfig.chains): string {
-    const addresses = {
-        sepolia: '0xa3D3ec93ec51Ee02AD04ae176ED9d0b32e469491',
-        arbTestnet: '0xBF5F3c3aB8c9B9102EDD73C535ddAaCce3191B34',
-    };
-
-    const address = addresses[chainName];
-    if (!address) {
-        throw new Error(`EscrowFactory address not found for chain: ${chainName}`);
-    }
-
-    return address;
-}
-
-function getLimitOrderProtocolAddress(chainName: keyof typeof testnetConfig.chains): string {
-    const addresses = {
-        sepolia: '0x5E3CE1C16004d5b70305191C4bdCc61f151B40e5',
-        arbTestnet: '0xB6A11d4b7Ede8aB816277B5080615DCC52Cc1B3F',
-    };
-
-    const address = addresses[chainName];
-    if (!address) {
-        throw new Error(`LimitOrderProtocol address not found for chain: ${chainName}`);
-    }
-
-    return address;
 }
 
 // Main execution
