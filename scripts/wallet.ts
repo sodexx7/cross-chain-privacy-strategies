@@ -1,7 +1,6 @@
 import { AbiCoder, Contract, JsonRpcProvider, Signer, TransactionRequest, Wallet as PKWallet } from 'ethers';
-import * as Sdk from '../sdk-custom/dist/cjs'; // modified sdk.
+import * as Sdk from '../custome-sdk-cross-chain/dist/cjs'; // modified sdk.
 import ERC20 from '../artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json';
-import { TypedDataDomain } from 'ethers';
 
 const coder = AbiCoder.defaultAbiCoder();
 

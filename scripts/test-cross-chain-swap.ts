@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { Signature, ethers } from 'ethers';
 import { testnetConfig, ChainDeployConfig } from './deploy-config';
-import * as Sdk from '../sdk-custom/dist/cjs'; // modified sdk.
+import * as Sdk from '../custome-sdk-cross-chain/dist/cjs'; // modified sdk.
 
 import { uint8ArrayToHex, UINT_40_MAX } from '@1inch/byte-utils';
 
@@ -67,10 +67,6 @@ const { Address } = Sdk;
            The resolver then uses the same secret to unlock the as-
           sets for the maker from the destination chain’s escrow,
           thereby finalizing the swap.
- *          
- * 
- * 
- * 
  */
 
 class CrossChainSwapTest {
