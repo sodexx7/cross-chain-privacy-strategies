@@ -30,19 +30,19 @@ In response to these challenges, our protocol integrates with 1inch’s Limit Or
 
 ## File structure explain
 
-1. GhostMesh based on [cross-chain-resolver](https://github.com/1inch/cross-chain-resolver-example), try to deploy 1inch services in the testnets instead of forking mainnets.
+GhostMesh based on [cross-chain-resolver](https://github.com/1inch/cross-chain-resolver-example), try to deploy 1inch services in the testnets instead of forking mainnets.
 
-    - [scripts] ghostMesh relate scripts. includes on-chain development config and the scritps for deploying lop, resolver contract,escrowFactory contract, along with the cross-chain test scripts. ``yarn test:cross-chain`
+-   [scripts](scripts) ghostMesh related scripts. includes on-chain development config and the scritps for deploying LOP, resolver contract,escrowFactory contract, along with the cross-chain test scripts. `yarn test:cross-chain`
 
-    - [test](test) is the original cross-chain-resolver-example test code.
+-   [test](test) is the original cross-chain-resolver-example test code.
 
-    - [custome-sdk-cross-chain](custome-sdk-cross-chain), To make the related config compitable with testnets, make some adjustmetns for developing, such as limited order address, escrowFactory..
+-   [custome-sdk-cross-chain](custome-sdk-cross-chain), To make the related config compitable with testnets, make some adjustmetns for developing, such as limited order address, escrowFactory... etc
 
-    - [contracts/1inch](contracts/1inch), which includes the necessary original limited order contracts and cross-order contracts, for now, to compitable with cross-chain, only comment out the taker->maker logic. more details can see [limited order may not support cross-chain swap](https://github.com/sodexx7/cross-chain-privacy-strategies/issues/1)
+-   [contracts/1inch](contracts/1inch), which includes the necessary original limited order contracts and cross-order contracts, for now, to compitable with cross-chain, only comment out the taker->maker logic in LOP. more details can see [limited order may not support cross-chain swap](https://github.com/sodexx7/cross-chain-privacy-strategies/issues/1)
 
-    - [contracts/resolver](contracts/resolver), originated from [cross-chain-resolver](https://github.com/1inch/cross-chain-resolver-example), the logic involved with the resolver contract and escrowFactory contract in source and target chain
+-   [contracts/resolver](contracts/resolver), originated from [cross-chain-resolver](https://github.com/1inch/cross-chain-resolver-example), the logic involved with the resolver contract and escrowFactory contract in source and target chain
 
-    - [contracts/ghostMesh](contracts/ghostMesh), the ghostMesh contract
+-   [contracts/ghostMesh](contracts/ghostMesh), the ghostMesh contract
 
 ## HOW TO START
 
@@ -65,7 +65,6 @@ node v22.15.0
     8. [address-mockweth:arbitrum](https://sepolia.arbiscan.io/address/0x522BBb1450d0e41EcEC8C9BC53b9c0fc1F3F9c87)
 
 2. Deploy scripts
-   deployed limited order contract, EscrowFactory, resolverConract in sepolia and Arbitrum sepolia chain
 
 ```
 yarn deploy:lop:sepolia
@@ -77,10 +76,7 @@ deploy:resolver:sepolia
 deploy:resolver:arbitrum
 yarn setup:mock-tokens
 yarn mint:mock-tokens
-<!-- user swap 1000 mockusdc in sepolia for 1 mockweht arbitrum sepoliam, before exeucte make sure
-user and resolver have enough token -->
+<!-- user swap 1000 mockusdc in sepolia for 1 mockweth arbitrum sepoliam, before exeucte make sure user and resolver have enough token -->
 yarn test:cross-chain
 
 ```
-
-Based on [cross-chain-resolver](https://github.com/1inch/cross-chain-resolver-example)
