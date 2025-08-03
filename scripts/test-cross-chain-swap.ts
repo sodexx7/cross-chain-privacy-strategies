@@ -320,7 +320,7 @@ async function main(): Promise<void> {
 
     // Resolver fills order
     const resolverContract = new Resolver(crossChainSwap.srcChainConfig.resolver, crossChainSwap.dstChainConfig.resolver);
-    console.log(`[${srcChainId}]`, `Filling order ${orderHash}`);
+    // console.log(`[${srcChainId}]`, `Filling order ${orderHash}`);
 
     const fillAmount = order.makingAmount;
     const { txHash: orderFillHash, blockHash: srcDeployBlock } = await crossChainSwap.srcChainResolver.send(
@@ -336,14 +336,10 @@ async function main(): Promise<void> {
     console.log(`[${srcChainId}]`, `srcDeployBlock ${srcDeployBlock} Order ${orderHash} filled for ${fillAmount} in tx ${orderFillHash}`);
 
     return;
-    // The following us under developing
+    // The following is under developing and testing
     // Doing check time confirmaiton in desinaiton
-    //// below deal dst chain
-    // check: should make sure resolverContract have enough taker token
-    //  srcDeployBlock = '0x30b861555e2ae46d5ff819b53f2f2b78e26485cc97cd9dfb92bdefb4e73dca9f';
-    const srcEscrowEvent = await crossChainSwap.srcEscrowFactory.getSrcDeployEvent(
-        '0x30b861555e2ae46d5ff819b53f2f2b78e26485cc97cd9dfb92bdefb4e73dca9f'
-    );
+    // const srcDeployBlock = '0x339d81004681b2e6b21c2f5b0f28025a6b90db6a7c082cb39c17f7e53f543ac7';
+    const srcEscrowEvent = await crossChainSwap.srcEscrowFactory.getSrcDeployEvent(srcDeployBlock);
 
     const dstImmutables = srcEscrowEvent[0].withComplement(srcEscrowEvent[1]).withTaker(new Address(resolverContract.dstAddress));
 

@@ -44,6 +44,12 @@ GhostMesh based on [cross-chain-resolver](https://github.com/1inch/cross-chain-r
 
 -   [contracts/ghostMesh](contracts/ghostMesh), the ghostMesh contract
 
+## Latest on-chain txs
+
+[sepolia swap 1000USDC -> 1 WETH](https://sepolia.etherscan.io/tx/0xb700c2b19354ed00b18e13bc497e1e4093ac22160d76af410efcb11fdf492374)
+
+[sepolia.arbiscan](https://sepolia.arbiscan.io/tx/0xf72cad1036357b103f91b18ed3d0095818a3c983282a54952ad378d44608b0ee) **testing**
+
 ## HOW TO START
 
 1. Environment
