@@ -15,7 +15,10 @@
     "check:lop:arbitrum": "CHAIN_NAME=arbTestnet ts-node scripts/check-limit-order.ts",
     "setup:mock-tokens": "ts-node scripts/setup-mock-tokens.ts",
     "mint:mock-tokens": "ts-node scripts/mint-mock-tokens.ts",
-    "test:cross-chain": "ts-node scripts/test-cross-chain-swap.ts"
+    "test:cross-chain": "ts-node scripts/test-cross-chain-swap.ts",
+    "demo:privacy": "ts-node scripts/privacy-demo.ts",
+    "demo:privacy-flow": "ts-node scripts/privacy-flow-demo.ts",
+    "deploy:privacy:sepolia": "CHAIN_NAME=sepolia ts-node -e \"console.log('Privacy contracts would be deployed to Sepolia')\""
   },
   "author": "",
   "license": "ISC",
