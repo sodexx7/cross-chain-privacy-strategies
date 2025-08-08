@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { Signature, ethers } from 'ethers';
 import { testnetConfig, ChainDeployConfig } from './deploy-config';
-import * as Sdk from '../custome-sdk-cross-chain/dist/cjs'; // modified sdk.
+import * as Sdk from '@1inch/cross-chain-sdk'; // modified sdk.
 
 import { uint8ArrayToHex, UINT_40_MAX } from '@1inch/byte-utils';
 

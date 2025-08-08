@@ -1,6 +1,6 @@
 import { Interface, Signature, TransactionRequest } from 'ethers';
 
-import * as Sdk from '../custome-sdk-cross-chain/dist/cjs'; // modified sdk.
+import * as Sdk from '@1inch/cross-chain-sdk'; // modified sdk.
 import ResolverArtifact from '../artifacts/contracts/resolver/Resolver.sol/Resolver.json';
 
 export class Resolver {

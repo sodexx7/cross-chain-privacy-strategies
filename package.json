@@ -47,7 +47,7 @@
     },
     "dependencies": {
         "@1inch/byte-utils": "2.6.0",
-        "@1inch/cross-chain-sdk": "v0.1.15-rc.0",
+        "@1inch/cross-chain-sdk": "sodexx7/cross-chain-sdk#cross-chain-sdk-adjust-for-GhostMesh",
         "@1inch/fusion-sdk": "2",
         "@1inch/limit-order-protocol-contract": "https://github.com/1inch/limit-order-protocol#4.3.0",
         "@1inch/limit-order-settlement": "2.1.0",

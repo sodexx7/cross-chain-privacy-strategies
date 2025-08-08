@@ -1,5 +1,5 @@
 import { id, Interface, JsonRpcProvider } from 'ethers';
-import * as Sdk from '../custome-sdk-cross-chain/dist/cjs'; // modified sdk.
+import * as Sdk from '@1inch/cross-chain-sdk'; // modified sdk.
 
 import EscrowFactoryContract from '../artifacts/contracts/resolver/TestEscrowFactory.sol/TestEscrowFactory.json';
 
